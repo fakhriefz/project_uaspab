@@ -41,7 +41,7 @@ class UserController extends Controller
             'name' => ['required', 'string'],
             'email' => ['required', 'string', 'email', 'unique:users'],
         ]);
-
+    
         $id = DB::table('users')->insertGetId([
             'name' => $request->name,
             'email' => $request->email,
@@ -51,18 +51,17 @@ class UserController extends Controller
             'role' => 'TERMINAL',
             'plain_token' => '',
         ]);
-
+    
         $user = User::find($id);
         $plain_token = $user->createToken('machine-to-machine-token')->plainTextToken;
         $user->plain_token = $plain_token;
         $user->save();
-
+    
         return response()->json([
             'token' => $plain_token,
             'message' => 'Registrasi Terminal Berhasil',
         ], 200);
     }
-
     // Login Administrator
     public function login(Request $request)
     {

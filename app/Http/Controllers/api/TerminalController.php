@@ -18,23 +18,24 @@ class TerminalController extends Controller
             'payment_enabled' => ['required', 'boolean'],
             'topup_enabled' => ['required', 'boolean'],
         ]);
-
-        // Minimal satu fungsi harus aktif
-        if (!$request->payment_enabled && !$request->topup_enabled) {
+    
+        $user = User::where('email', $request->email)
+                   ->where('role', 'TERMINAL')
+                   ->first();
+    
+        if (!$user) {
             return response()->json([
-                'message' => 'Terminal harus memiliki minimal satu fungsi aktif'
-            ], 422);
+                'message' => 'User terminal tidak ditemukan'
+            ], 404);
         }
-
-        $user = User::where('email', $request->email)->first();
+    
         $terminal = Terminal::where('user_id', $user->id)->first();
-
-        if ($terminal != null) {
+        if ($terminal) {
             return response()->json([
-                'message' => 'Email sudah dipakai di terminal lain'
+                'message' => 'Terminal sudah ada untuk user ini'
             ], 422);
         }
-
+    
         DB::table('terminals')->insert([
             'user_id' => $user->id,
             'location_branch' => $request->location_branch,
@@ -43,7 +44,7 @@ class TerminalController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
+    
         return response()->json(['message' => 'Terminal berhasil dibuat'], 200);
     }
     public function list(Request $request)
